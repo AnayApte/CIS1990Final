@@ -18,7 +18,13 @@ class SchedulerAgent:
         self.router = Router(self.memory)
 
     # ── Setup phase ──────────────────────────────────────────────────────────
-    def setup(self, classes_taken: list[str], major: str, preferences: dict):
+    def setup(
+        self,
+        classes_taken: list[str],
+        major: str,
+        preferences: dict,
+        planned_courses: list[str] | None = None,
+    ):
         """
         Called once at the start of a session to populate memory.
         Stores completed courses, major, and user preferences.
@@ -26,6 +32,8 @@ class SchedulerAgent:
         self.memory.set_classes(classes_taken)
         self.memory.set_major(major)
         self.memory.set_preferences(preferences)
+        for course_code in planned_courses or []:
+            self.memory.add_course_to_schedule(course_code, "", 0)
         print("[Setup] Memory initialized.")
 
     # ── Dynamic scheduling loop ───────────────────────────────────────────────
