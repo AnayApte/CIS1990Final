@@ -5,7 +5,10 @@ Scraper and normalizer for SEAS undergraduate degree requirements.
 from __future__ import annotations
 
 import html
+import logging
 import re
+
+logger = logging.getLogger(__name__)
 
 import requests
 
@@ -265,7 +268,12 @@ def _is_requirement_satisfied(requirement: dict, taken: set[str]) -> tuple[bool,
 
 def evaluate_engineering_degree_progress(major: str, classes_taken: list[str]) -> dict:
     degree = get_engineering_degree_requirements(major)
-    taken = {_normalize_course_code(code) for code in classes_taken}
+    taken: set[str] = set()
+    for _code in classes_taken:
+        try:
+            taken.add(_normalize_course_code(_code))
+        except RuntimeError:
+            logger.debug("Skipping unrecognized course code: %s", _code)
 
     satisfied = []
     unsatisfied = []

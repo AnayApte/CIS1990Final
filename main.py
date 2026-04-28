@@ -47,10 +47,21 @@ def collect_setup() -> dict:
     }
 
 
+_STATE_FILE = "user_state.json"
+
+
 def main():
     agent = SchedulerAgent()
-    setup_data = collect_setup()
-    agent.setup(**setup_data)
+
+    loaded = agent.memory.load(_STATE_FILE)
+    if loaded:
+        n = len(agent.memory.classes_taken)
+        major = agent.memory.major or "(not set)"
+        print(f"Loaded saved state — {n} courses completed, major: {major}")
+    else:
+        print("No saved state found, starting fresh.")
+        setup_data = collect_setup()
+        agent.setup(**setup_data)
 
     print("\n=== Scheduler ready! Type 'quit' to exit. ===\n")
     while True:

@@ -37,11 +37,11 @@ class SchedulerAgent:
         print("[Setup] Memory initialized.")
 
     # ── Dynamic scheduling loop ───────────────────────────────────────────────
-    def run(self, user_prompt: str) -> str:
+    def run(self, user_prompt: str, recent_turns: list[dict[str, str]] | None = None) -> str:
         """
         Main entry point after setup.
         Validates input → routes to appropriate tool(s) → returns response.
         """
         safe_prompt = self.guardrails.check_input(user_prompt)
-        response = self.router.route(safe_prompt)
+        response = self.router.route(safe_prompt, recent_turns=recent_turns)
         return self.guardrails.check_output(response)
