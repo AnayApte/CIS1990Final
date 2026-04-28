@@ -54,6 +54,7 @@ from tools.transcript_parser.transcript_parser import (
     parse_transcript_text,
 )
 
+_MAX_TRANSCRIPT_BYTES = 10 * 1024 * 1024  # 10 MB
 _STATE_FILE = "user_state.json"
 _CONVERSATION_FILE = "conversation_state.json"
 _executor = ThreadPoolExecutor(max_workers=1)  # one agent, one request at a time
@@ -141,6 +142,9 @@ async def upload_transcript(
         raise HTTPException(status_code=400, detail="apply_mode must be 'stage' or 'merge'")
 
     content = await file.read()
+    if len(content) > _MAX_TRANSCRIPT_BYTES:
+        raise HTTPException(status_code=413, detail="File too large (max 10 MB).")
+
     is_pdf = (
         (file.filename or "").lower().endswith(".pdf")
         or file.content_type == "application/pdf"
@@ -152,10 +156,23 @@ async def upload_transcript(
             tmp_path = tmp.name
         try:
             result = parse_transcript_pdf(tmp_path)
+        except Exception:
+            logger.exception("Transcript PDF parsing failed")
+            raise HTTPException(
+                status_code=400,
+                detail="Could not parse transcript. Please ensure it is a valid Penn unofficial transcript PDF.",
+            )
         finally:
             os.unlink(tmp_path)
     else:
-        result = parse_transcript_text(content.decode("utf-8", errors="replace"))
+        try:
+            result = parse_transcript_text(content.decode("utf-8", errors="replace"))
+        except Exception:
+            logger.exception("Transcript text parsing failed")
+            raise HTTPException(
+                status_code=400,
+                detail="Could not parse transcript. Please ensure it is a valid Penn unofficial transcript.",
+            )
 
     courses = result["courses"]
     student_info = result["student_info"]

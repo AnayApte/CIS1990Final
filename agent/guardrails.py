@@ -3,7 +3,10 @@ Guardrails: input/output validation and exception handling.
 Applied at entry (before Router) and exit (before returning to user).
 """
 
+import re
+
 _INJECTION_PHRASES = [
+    # Original blocklist
     "ignore previous instructions",
     "ignore all previous",
     "system prompt",
@@ -14,7 +17,21 @@ _INJECTION_PHRASES = [
     "jailbreak",
     "bypass",
     "override instructions",
+    # Extended — roleplay / persona hijacking
+    "act as",
+    "pretend you are",
+    "pretend to be",
+    "roleplay as",
+    "role-play as",
+    "simulate being",
+    "hypothetically",
+    "for educational purposes",
+    "in this scenario",
+    "dan mode",
+    "developer mode",
 ]
+
+_WHITESPACE_RE = re.compile(r"\s+")
 
 _ADVISORY_TRIGGERS = [
     "requirement",
@@ -49,9 +66,11 @@ class Guardrails:
         text = text.strip()
         if len(text) > self.MAX_INPUT_LENGTH:
             raise ValueError(f"Input too long (max {self.MAX_INPUT_LENGTH} chars).")
-        lower = text.lower()
+        # Collapse all whitespace (including newlines) to a single space so that
+        # phrase-split attempts like "ignore\nprevious instructions" are caught.
+        normalized = _WHITESPACE_RE.sub(" ", text.lower())
         for phrase in _INJECTION_PHRASES:
-            if phrase in lower:
+            if phrase in normalized:
                 raise ValueError("Input contains disallowed content.")
         return text
 

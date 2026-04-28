@@ -1,24 +1,24 @@
 {
   "turns": [
     {
-      "user": "Section 3",
-      "assistant": "I've added LGST-1000, Section 003 to your schedule for next semester. Here's your updated schedule:\n\n- **CIS-3200**\n- **CIS-5200**\n- **CIS-3990**\n- **MATH-3000**\n- **LGST-1000 (Section 003)**\n\nLet me know if you have any other changes or questions!"
+      "user": "when is it scheduled for next semester",
+      "assistant": "NETS-2120 \"Scalable & Cloud Computing\" is scheduled as follows next semester:\n\n- **Lecture (Section 001)**\n  - **Days:** Tuesday and Thursday\n  - **Time:** 10:15 AM - 11:44 AM\n  - **Location:** AGH 105A and AGH 105B\n  - **Instructor:** Andreas Haeberlen\n\nThe course is currently open with a capacity of 70 students. If you have any other questions or need more information, feel free to ask!"
     },
     {
-      "user": "can we add CIS-4300",
-      "assistant": "Currently, CIS-4300 doesn't fit into your schedule. The lecture for CIS-4300 conflicts with your other courses. Since CIS-4300 is mutually exclusive with CIS-5300, you cannot take both courses simultaneously if you're considering other options.\n\nYour updated schedule remains:\n\n- **CIS-3200**\n- **CIS-5200**\n- **CIS-3990**\n- **LGST-1000 (Section 003)**\n- **MATH-3000**\n\nLet me know if you'd like to explore other options or need further assistance!"
+      "user": "i don't see it in my schedule tab?",
+      "assistant": "It seems NETS-2120 is still conflicting with both CIS-5200 and CIS-4300 in terms of scheduling. This might be why it's not appearing properly in your schedule tab. Would you like to replace one of these courses with NETS-2120, or would you like to attempt any other action like checking another semester's offering? Let me know how you'd like to proceed!"
     },
     {
-      "user": "which course does it conflict with",
-      "assistant": "The lecture for CIS-4300 meets on Mondays and Wednesdays from 1:45 PM to 3:14 PM, which conflicts with LGST-1000 Section 003, which meets on Mondays and Wednesdays from 12:00 PM to 1:29 PM.\n\nIf you want to explore other sections or options, let me know!"
+      "user": "clear all courses for next sem",
+      "assistant": "I've cleared all your courses from the schedule for next semester. If you need help selecting new courses or have any other questions, feel free to ask!"
     },
     {
-      "user": "replace LGST with CIS-4300",
-      "assistant": "It seems CIS-4300 also conflicts with another course you're taking, CIS-5200. Therefore, I cannot add CIS-4300 to your schedule without dropping CIS-5200.\n\nYour current schedule is now:\n\n- **CIS-3200**\n- **CIS-5200**\n- **CIS-3990**\n\nLGST-1000 has been removed. If you'd like to add CIS-4300 and adjust your schedule further, please let me know how you'd like to proceed!"
+      "user": "add nets-2120",
+      "assistant": "I've successfully added NETS-2120 to your schedule for the next semester. If you want to add more courses or make any other adjustments, just let me know!"
     },
     {
-      "user": "replace both of them",
-      "assistant": "Replaced CIS-5200 with CIS-4300. Current schedule: CIS-3200, CIS-3990, CIS-4300."
+      "user": "what courses are available next sem",
+      "assistant": "Next semester, the following CIS courses are available:\n\n1. **CIS-1050** - Computational Data Exploration\n   - Credits: 1.0\n   - Quality: 3.204\n   - Difficulty: 2.595\n\n2. **CIS-1210** - Programming Languages and Techniques II\n   - Credits: 1.0\n   - Quality: 2.758\n   - Difficulty: 3.504\n\n3. **CIS-2400** - Introduction to Computer Systems\n   - Credits: 1.0\n   - Quality: 2.664\n   - Difficulty: 3.213\n\n4. **CIS-3200** - Introduction to Algorithms\n   - Credits: 1.0\n   - Quality: 2.737\n   - Difficulty: 3.514\n\n5. **CIS-3410** - Compilers & Interpreters\n   - Credits: 1.0\n   - Quality: 3.354\n   - Difficulty: 3.527\n\n6. **CIS-3500** - Software Design/Engineering\n   - Credits: 1.0\n   - Quality: 2.641\n   - Difficulty: 1.948\n\n7. **CIS-3800** - Computer Operating Systems\n   - Credits: 1.0\n   - Quality: 2.942\n   - Difficulty: 3.388\n\n8. **CIS-4500** - Database & Information Systems\n   - Credits: 1.0\n   - Quality: 2.586\n   - Difficulty: 2.441\n\n9. **CIS-5200** - Machine Learning\n   - Credits: 1.0\n   - Quality: 2.794\n   - Difficulty: 3.231\n\n10. **CIS-5600** - Interactive Computer Graphics\n    - Credits: 1.0\n    - Quality: 3.235\n    - Difficulty: 3.316\n\nThis is just a selection; there are many more courses offered. If you're interested in a particular area or have specific courses in mind, please let me know, and I can provide more detailed information or help you plan your schedule further!\n\n---\n*Note: This tool is advisory only. Please verify your degree requirements through Path@Penn and your academic advisor.*"
     }
   ]
 }

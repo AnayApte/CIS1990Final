@@ -231,21 +231,20 @@ function renderTranscriptPreview(data, previewId = 'transcript-preview') {
   const preview = document.getElementById(previewId);
 
   let html = `<div class="tp-header">
-    <span>${data.summary}</span>
+    <span>${escHtml(data.summary || '')}</span>
     <span style="font-weight:400;color:#999">${data.applied ? 'saved to record' : 'review below'}</span>
   </div>`;
 
   for (const [sem, courses] of Object.entries(data.by_semester)) {
-    html += `<div class="tp-semester">${sem}</div>`;
+    html += `<div class="tp-semester">${escHtml(sem)}</div>`;
     for (const c of courses) {
-      const title = c.title
-        ? (c.title.length > 38 ? c.title.slice(0, 38) + '…' : c.title)
-        : '';
+      const rawTitle = c.title || '';
+      const truncated = rawTitle.length > 38 ? rawTitle.slice(0, 38) + '…' : rawTitle;
       html += `<div class="tp-course">
-        <span class="tp-code">${c.code}</span>
-        <span class="tp-title" title="${c.title || ''}">${title}</span>
+        <span class="tp-code">${escHtml(c.code || '')}</span>
+        <span class="tp-title" title="${escHtml(rawTitle)}">${escHtml(truncated)}</span>
         ${c.source === 'ap_credit' ? '<span class="tp-source">AP</span>' : ''}
-        <span class="tp-grade">${c.grade}</span>
+        <span class="tp-grade">${escHtml(c.grade || '')}</span>
       </div>`;
     }
   }
@@ -458,7 +457,7 @@ function appendBotMessage(markdown) {
   row.className = 'message-row agent';
   row.innerHTML = `
     <div class="avatar agent">P</div>
-    <div class="bubble">${marked.parse(markdown)}</div>
+    <div class="bubble">${DOMPurify.sanitize(marked.parse(markdown))}</div>
   `;
   appendRow(row);
 }

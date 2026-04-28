@@ -6,13 +6,7 @@
   "classes_taken": [
     "CIS-1100",
     "CIS-1200",
-    "CIS-1210",
     "CIS-1600",
-    "CIS-1912",
-    "CIS-1990",
-    "CIS-2620",
-    "EAS-2030",
-    "ESE-2030",
     "MATH-1300",
     "MATH-1400",
     "MATH-1610",
@@ -24,111 +18,55 @@
   "preferences": {},
   "schedule": [
     {
-      "course": "CIS-3200",
+      "course": "NETS-2120",
       "slot": "",
-      "credits": 0,
-      "selected_sections": [
-        {
-          "section_id": "CIS-3200-001",
-          "activity": "LEC",
-          "status": "open",
-          "meetings": [
-            {
-              "day": "M",
-              "start": 15.3,
-              "end": 16.59,
-              "room": "TOWN 100"
-            },
-            {
-              "day": "W",
-              "start": 15.3,
-              "end": 16.59,
-              "room": "TOWN 100"
-            }
-          ],
-          "instructors": [
-            "Sampath Kannan"
-          ]
-        }
-      ]
-    },
-    {
-      "course": "CIS-3990",
-      "slot": "",
-      "credits": 0,
-      "selected_sections": [
-        {
-          "section_id": "CIS-3990-001",
-          "activity": "LEC",
-          "status": "open",
-          "meetings": [
-            {
-              "day": "R",
-              "start": 13.45,
-              "end": 15.14,
-              "room": "LEVH 101"
-            },
-            {
-              "day": "T",
-              "start": 13.45,
-              "end": 15.14,
-              "room": "LEVH 101"
-            }
-          ],
-          "instructors": [
-            "Zachary Ives",
-            "Harry S. Smith"
-          ]
-        },
-        {
-          "section_id": "CIS-3990-201",
-          "activity": "REC",
-          "status": "open",
-          "meetings": [
-            {
-              "day": "R",
-              "start": 15.3,
-              "end": 16.59,
-              "room": "AGH 203"
-            }
-          ],
-          "instructors": [
-            "Travis Q. Mcgaha"
-          ]
-        }
-      ]
-    },
-    {
-      "course": "CIS-4300",
-      "slot": "",
-      "credits": 0,
-      "selected_sections": [
-        {
-          "section_id": "CIS-4300-401",
-          "activity": "LEC",
-          "status": "open",
-          "meetings": [
-            {
-              "day": "M",
-              "start": 13.45,
-              "end": 15.14,
-              "room": "AGH 106B"
-            },
-            {
-              "day": "W",
-              "start": 13.45,
-              "end": 15.14,
-              "room": "AGH 106B"
-            }
-          ],
-          "instructors": [
-            "Mark Yatskar"
-          ]
-        }
-      ]
+      "credits": 0
     }
   ],
   "pending_courses": [],
-  "pending_schedule_request": {},
+  "pending_schedule_request": {
+    "action": "add_course",
+    "course_code": "NETS-2120",
+    "conflicting_courses": [
+      "CIS-5200",
+      "CIS-4300"
+    ],
+    "selected_sections": [
+      {
+        "section_id": "NETS-2120-001",
+        "activity": "LEC",
+        "status": "open",
+        "meetings": [
+          {
+            "day": "R",
+            "start": 10.15,
+            "end": 11.44,
+            "room": "AGH 105A"
+          },
+          {
+            "day": "T",
+            "start": 10.15,
+            "end": 11.44,
+            "room": "AGH 105A"
+          },
+          {
+            "day": "R",
+            "start": 10.15,
+            "end": 11.44,
+            "room": "AGH 105B"
+          },
+          {
+            "day": "T",
+            "start": 10.15,
+            "end": 11.44,
+            "room": "AGH 105B"
+          }
+        ],
+        "instructors": [
+          "Andreas Haeberlen"
+        ]
+      }
+    ]
+  },
   "additional_courses": []
 }

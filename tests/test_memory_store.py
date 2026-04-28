@@ -155,3 +155,61 @@ def test_pending_courses_persist_across_save_load(tmp_path):
     m2.load(filepath)
     assert len(m2.pending_courses) == 3
     assert m2.pending_courses[0]["code"] == "CIS-1200"
+
+
+# ── Atomic write + corruption recovery (Guardrail 3) ─────────────────────────
+
+def test_load_corrupted_file_returns_fresh_state(tmp_path):
+    filepath = str(tmp_path / "state.json")
+    with open(filepath, "w") as f:
+        f.write("not valid json {{{{")
+
+    m = MemoryStore()
+    result = m.load(filepath)
+
+    assert result is False
+    assert m.classes_taken == []
+    assert m.major == ""
+    assert m.preferences == {}
+    assert m.schedule == []
+
+
+def test_load_with_wrong_field_types_falls_back_to_defaults(tmp_path):
+    filepath = str(tmp_path / "state.json")
+    bad_data = {
+        "student": {"major": 12345},
+        "classes_taken": "not a list",
+        "preferences": ["not", "a", "dict"],
+        "schedule": None,
+        "pending_courses": {},
+        "pending_schedule_request": [],
+    }
+    with open(filepath, "w") as f:
+        json.dump(bad_data, f)
+
+    m = MemoryStore()
+    result = m.load(filepath)
+
+    assert result is True
+    assert m.major == ""
+    assert m.classes_taken == []
+    assert m.preferences == {}
+    assert m.schedule == []
+    assert m.pending_courses == []
+    assert m.pending_schedule_request == {}
+
+
+def test_save_is_atomic(tmp_path):
+    filepath = str(tmp_path / "state.json")
+    m = MemoryStore()
+    m.set_classes(["CIS-1200"])
+    m.save(filepath)
+
+    # No leftover temp files — atomic write should rename cleanly
+    leftover = [f for f in os.listdir(tmp_path) if f.startswith(".memstore_")]
+    assert leftover == []
+
+    # File is valid JSON
+    with open(filepath) as f:
+        data = json.load(f)
+    assert "CIS-1200" in data["classes_taken"]

@@ -11,8 +11,12 @@ Also provides semantic retrieval for the Router to pull relevant context.
 """
 
 import json
+import logging
 import os
 import re
+import tempfile
+
+logger = logging.getLogger(__name__)
 
 
 class MemoryStore:
@@ -151,7 +155,7 @@ class MemoryStore:
 
     # ── Persistence ──────────────────────────────────────────────────────────
     def save(self, filepath: str = "user_state.json") -> None:
-        """Serialize state to JSON. Does not change the auto-save path."""
+        """Serialize state to JSON atomically. Does not change the auto-save path."""
         data = {
             "student": {"major": self.major, "year": ""},
             "classes_taken": self.classes_taken,
@@ -161,27 +165,48 @@ class MemoryStore:
             "pending_schedule_request": self.pending_schedule_request,
             "additional_courses": [],
         }
-        with open(filepath, "w") as f:
-            json.dump(data, f, indent=2)
+        try:
+            dir_name = os.path.dirname(os.path.abspath(filepath)) or "."
+            with tempfile.NamedTemporaryFile(
+                mode="w", dir=dir_name, prefix=".memstore_",
+                suffix=".tmp", delete=False, encoding="utf-8",
+            ) as tmp:
+                json.dump(data, tmp, indent=2)
+                tmp_path = tmp.name
+            os.replace(tmp_path, filepath)
+        except Exception as exc:
+            logger.error("Failed to save MemoryStore to %s: %s", filepath, exc)
 
     def load(self, filepath: str = "user_state.json") -> bool:
         """
         Load state from a JSON file. Sets the auto-save path for this instance.
-        Returns True if the file was found and loaded, False if it didn't exist
+        Returns True if the file was found and loaded, False otherwise
         (state remains empty — does not raise).
         """
         self._filepath = filepath
         if not os.path.exists(filepath):
             return False
-        with open(filepath) as f:
-            data = json.load(f)
+        try:
+            with open(filepath, encoding="utf-8") as f:
+                data = json.load(f)
+        except (json.JSONDecodeError, OSError) as exc:
+            logger.warning(
+                "Could not load state from %s: %s. Starting fresh.", filepath, exc
+            )
+            return False
         student = data.get("student", {})
-        self.major = student.get("major", data.get("major", ""))
-        self.classes_taken = data.get("classes_taken", [])
-        self.preferences = data.get("preferences", {})
-        self.schedule = data.get("schedule", [])
-        self.pending_courses = data.get("pending_courses", [])
-        self.pending_schedule_request = data.get("pending_schedule_request", {})
+        major = student.get("major", data.get("major", ""))
+        self.major = major if isinstance(major, str) else ""
+        classes = data.get("classes_taken", [])
+        self.classes_taken = classes if isinstance(classes, list) else []
+        prefs = data.get("preferences", {})
+        self.preferences = prefs if isinstance(prefs, dict) else {}
+        schedule = data.get("schedule", [])
+        self.schedule = schedule if isinstance(schedule, list) else []
+        pending = data.get("pending_courses", [])
+        self.pending_courses = pending if isinstance(pending, list) else []
+        pending_req = data.get("pending_schedule_request", {})
+        self.pending_schedule_request = pending_req if isinstance(pending_req, dict) else {}
         return True
 
     def _autosave(self) -> None:

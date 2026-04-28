@@ -29,6 +29,7 @@ MODEL = "gpt-4o"
 MAX_TOKENS = 4096
 MAX_TOOL_ROUNDS = 8
 _COURSE_CODE_RE = re.compile(r"\b([A-Z]{2,5})[- ]?([0-9][0-9A-Z]{3})\b", re.IGNORECASE)
+_VALID_COURSE_CODE = re.compile(r"^[A-Z]{2,5}-[0-9][0-9A-Z]{3}$")
 
 _TOOLS = [
     {
@@ -305,11 +306,12 @@ _TOOLS = [
         "function": {
             "name": "parse_transcript",
             "description": (
-                "Parse a Penn unofficial transcript to extract completed courses. "
-                "Returns a structured list of courses for user review — does NOT "
-                "save to memory automatically. Always present results and ask for "
-                "confirmation before calling confirm_transcript_courses. "
-                "Accepts either 'text' (raw pasted transcript) or 'filepath' (path to PDF)."
+                "Parse a Penn unofficial transcript pasted directly into the chat "
+                "to extract completed courses. Returns a structured list of courses "
+                "for user review — does NOT save to memory automatically. Always "
+                "present results and ask for confirmation before calling "
+                "confirm_transcript_courses. PDF transcripts must be uploaded "
+                "through the UI upload button, not via this tool."
             ),
             "parameters": {
                 "type": "object",
@@ -318,11 +320,8 @@ _TOOLS = [
                         "type": "string",
                         "description": "Raw text of a Penn unofficial transcript, pasted directly by the student.",
                     },
-                    "filepath": {
-                        "type": "string",
-                        "description": "Absolute or relative path to a Penn transcript PDF file.",
-                    },
                 },
+                "required": ["text"],
             },
         },
     },
@@ -384,7 +383,9 @@ _TOOLS = [
             "description": (
                 "Add course codes directly to the student's completed course record "
                 "when they mention courses in casual conversation. Merges with — "
-                "does not replace — existing completed courses."
+                "does not replace — existing completed courses. "
+                "Course codes must match the pattern DEPT-NNNN (e.g., CIS-1200). "
+                "Invalid codes will be rejected and reported back."
             ),
             "parameters": {
                 "type": "object",
@@ -474,15 +475,20 @@ Guidelines:
   results instead of dumping raw tool output.
 - Factor in the student's completed courses and preferences when relevant.
 - Be concise and accurate. Do not guess course rules or ratings.
-- If a tool fails, data is unavailable, or a lookup returns incomplete results,
-  do not mention API errors, internal failures, or backend issues to the
-  student. Instead, say you couldn't find reliable course information right now
-  and offer the next best help, such as broader planning advice, alternative
-  courses to consider, or a suggestion to try another course code or department.
+- If a tool call returns success: false, or a data lookup genuinely fails (e.g.
+  the course is not found in any catalog or API), do not mention API errors or
+  backend issues. Instead, tell the student you couldn't verify that course
+  right now and suggest trying another code, checking the department listing,
+  or asking for broader planning advice.
+- Do NOT use the above fallback for schedule conflicts or preference violations
+  — those are not errors. Handle them as described in the Schedule management
+  section below.
 
 Transcript confirmation flow:
-- When a student pastes transcript text or mentions a transcript PDF, call
-  parse_transcript immediately. Do NOT save automatically.
+- When a student pastes transcript text directly into the chat, call
+  parse_transcript immediately with the 'text' parameter. Do NOT save automatically.
+- If a student asks to upload a PDF transcript, direct them to use the upload
+  button in the UI. You cannot read PDF files directly.
 - After parse_transcript returns, present the extracted courses grouped by
   semester in a readable list, then ask: "Does this look complete? Let me know
   if I'm missing any courses or if anything looks wrong."
@@ -516,10 +522,19 @@ Schedule management:
   add_courses_to_schedule immediately.
 - When a student explicitly asks to remove or drop a course from their
   schedule, call remove_courses_from_schedule immediately.
-- Before adding a course to the student's schedule, check whether it conflicts
-  with the current schedule. If it does, do not silently add it. Instead, ask
-  whether the student wants to replace one of the conflicting courses or keep
-  both and accept the conflict.
+- If add_courses_to_schedule returns a non-empty "conflicts" list, do NOT
+  return the generic fallback message. Instead, tell the student specifically
+  which course(s) conflict and ask: "Would you like to replace one of the
+  conflicting courses, or add it anyway and keep both?" Wait for their answer
+  before taking any further action.
+- If adding a course would violate a stated user preference (e.g. an early
+  morning course when the student said no 8am classes, or exceeding their max
+  credit limit), do NOT silently skip it or return the fallback message.
+  Instead, tell the student what preference would be violated and ask: "Would
+  you still like to add it?" Only add the course if they confirm.
+- If add_courses_to_schedule returns a course in the "unavailable" list, tell
+  the student you couldn't verify a current offering for that code and suggest
+  double-checking the course number or trying a nearby semester.
 - Treat the schedule as persistent session state. Do not merely say a course
   was added unless the schedule-memory tool was actually called successfully.
 """
@@ -631,7 +646,8 @@ class Router:
 
     def _handle_direct_schedule_update(self, prompt: str) -> str | None:
         lower = prompt.lower()
-        if "schedule" not in lower:
+        _SCHEDULE_TRIGGERS = ("schedule", "plan", "next semester", "semester's plan", "my courses")
+        if not any(trigger in lower for trigger in _SCHEDULE_TRIGGERS):
             return None
 
         add_intent = bool(re.search(r"\b(add|include|put)\b", lower))
@@ -933,15 +949,12 @@ class Router:
                 "error": None,
             }
         elif fn_name == "parse_transcript":
-            if "text" in fn_args:
-                result = transcript_parser_tool("parse_text", {"text": fn_args["text"]})
-            elif "filepath" in fn_args:
-                result = transcript_parser_tool("parse_pdf", {"filepath": fn_args["filepath"]})
-            else:
+            if "text" not in fn_args:
                 return json.dumps({
                     "success": False,
-                    "error": "parse_transcript requires either 'text' or 'filepath'",
+                    "error": "parse_transcript requires a 'text' parameter with the pasted transcript content.",
                 })
+            result = transcript_parser_tool("parse_text", {"text": fn_args["text"]})
             if result["success"] and result["data"]:
                 courses = result["data"].get("courses", [])
                 self.memory.set_pending_courses(courses)
@@ -979,20 +992,27 @@ class Router:
             })
         elif fn_name == "add_courses_manually":
             raw = fn_args.get("courses", [])
-            new_codes = [c.upper().strip() for c in raw if c.strip()]
+            # Normalize: uppercase, strip, collapse spaces to dashes
+            normalized = [
+                re.sub(r"\s+", "-", c.upper().strip())
+                for c in raw if c.strip()
+            ]
+            valid_codes = [c for c in normalized if _VALID_COURSE_CODE.match(c)]
+            rejected_codes = [c for c in normalized if not _VALID_COURSE_CODE.match(c)]
             existing = set(self.memory.classes_taken)
-            merged = sorted(existing | set(new_codes))
+            merged = sorted(existing | set(valid_codes))
             self.memory.set_classes(merged)
-            added = sorted(set(new_codes) - existing)
+            added = sorted(set(valid_codes) - existing)
+            msg = f"Added {len(added)} course(s). You now have {len(merged)} courses on record."
+            if rejected_codes:
+                msg += f" Rejected {len(rejected_codes)} invalid code(s): {', '.join(rejected_codes)}."
             return json.dumps({
                 "success": True,
                 "data": {
                     "added": added,
+                    "rejected": rejected_codes,
                     "total_courses": len(merged),
-                    "message": (
-                        f"Added {len(added)} course(s). "
-                        f"You now have {len(merged)} courses on record."
-                    ),
+                    "message": msg,
                 },
                 "error": None,
             })
