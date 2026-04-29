@@ -1,0 +1,72 @@
+{
+  "student": {
+    "major": "Computer Science",
+    "year": ""
+  },
+  "classes_taken": [
+    "CIS-1100",
+    "CIS-1200",
+    "CIS-1600",
+    "MATH-1300",
+    "MATH-1400",
+    "MATH-1610",
+    "PHYS-0101",
+    "PHYS-1500",
+    "STAT-4300",
+    "WRIT-0390"
+  ],
+  "preferences": {},
+  "schedule": [
+    {
+      "course": "NETS-2120",
+      "slot": "",
+      "credits": 0
+    }
+  ],
+  "pending_courses": [],
+  "pending_schedule_request": {
+    "action": "add_course",
+    "course_code": "NETS-2120",
+    "conflicting_courses": [
+      "CIS-5200",
+      "CIS-4300"
+    ],
+    "selected_sections": [
+      {
+        "section_id": "NETS-2120-001",
+        "activity": "LEC",
+        "status": "open",
+        "meetings": [
+          {
+            "day": "R",
+            "start": 10.15,
+            "end": 11.44,
+            "room": "AGH 105A"
+          },
+          {
+            "day": "T",
+            "start": 10.15,
+            "end": 11.44,
+            "room": "AGH 105A"
+          },
+          {
+            "day": "R",
+            "start": 10.15,
+            "end": 11.44,
+            "room": "AGH 105B"
+          },
+          {
+            "day": "T",
+            "start": 10.15,
+            "end": 11.44,
+            "room": "AGH 105B"
+          }
+        ],
+        "instructors": [
+          "Andreas Haeberlen"
+        ]
+      }
+    ]
+  },
+  "additional_courses": []
+}

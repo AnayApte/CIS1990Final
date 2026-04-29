@@ -1,32 +1,18 @@
 # Data Directory
 
-Populate these files before running the agent.
+This directory is reserved for any future local data files.
 
-## courses.json
-List of available courses. Example schema:
-```json
-[
-  {
-    "code": "CIS-2620",
-    "title": "Automata, Computability, and Complexity",
-    "dept": "CIS",
-    "credits": 1,
-    "slots": ["MWF 10-11am", "TR 12-1:30pm"],
-    "description": "Introduction to the theory of computation..."
-  }
-]
-```
+## Current architecture
 
-## prerequisites.json
-Map of course → list of required prereqs. Example:
-```json
-{
-  "CIS-2620": ["CIS-1200", "CIS-1600"],
-  "CIS-3200": ["CIS-2620", "CIS-1600"]
-}
-```
+All course data is fetched live from public APIs — no local data files are
+required to run the project:
 
-## How to populate
-- Export from Penn InTouch / Path@Penn
-- Scrape from Penn Course Review API (see tools/pcr_api.py)
-- Manually curate for your target departments
+- **Penn Course Review** (`penncoursereview.com/api/base`) — live offerings,
+  sections, ratings, and section meeting times. Results are cached in memory
+  per session (TTL 5–10 min).
+- **UPenn Catalog** (`catalog.upenn.edu`) — official course descriptions,
+  prerequisites, mutual exclusions, and cross-listings. Results cached 30–60 min.
+- **SEAS degree requirements** (`catalog.upenn.edu/undergraduate/engineering-applied-science/majors/`) —
+  scraped per major on first request, cached for the session.
+
+No API key or token is needed for any of these sources.

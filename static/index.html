@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Penn Academic Co-Pilot</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ── Setup overlay ────────────────────────────────────────────────────── -->
+  <div id="setup-overlay" class="overlay">
+    <div class="setup-card">
+
+      <div class="setup-header">
+        <div class="wordmark"><span class="red">Penn</span> Academic Co-Pilot</div>
+        <p>Your AI-powered guide to SEAS course planning.</p>
+      </div>
+
+      <div class="setup-body">
+
+        <div class="form-group">
+          <label for="major-select">Your major</label>
+          <select id="major-select">
+            <option value="">Select a SEAS major…</option>
+            <option>Bioengineering</option>
+            <option>Chemical and Biomolecular Engineering</option>
+            <option>Computer Engineering</option>
+            <option>Computer Science</option>
+            <option>Digital Media Design</option>
+            <option>Electrical Engineering</option>
+            <option>Materials Science and Engineering</option>
+            <option>Mechanical Engineering and Applied Mechanics</option>
+            <option>Networked and Social Systems Engineering</option>
+            <option>Systems Engineering</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>
+            Transcript
+            <span class="optional">— optional, helps personalize recommendations</span>
+          </label>
+          <div class="upload-area" id="upload-area">
+            <input type="file" id="transcript-file" accept=".pdf,.txt" />
+            <div class="upload-icon">📄</div>
+            <p id="upload-label">
+              <span class="upload-link" id="upload-trigger">Choose your transcript PDF</span>
+              or drag it here
+            </p>
+            <p class="upload-sub">Penn unofficial transcript · PDF or plain text</p>
+          </div>
+          <div id="transcript-preview" class="transcript-preview hidden"></div>
+        </div>
+
+        <button class="btn-primary" id="get-started-btn" disabled>
+          Get started →
+        </button>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Chat application ──────────────────────────────────────────────────── -->
+  <div id="app" class="hidden">
+
+    <header class="app-header">
+      <div class="header-brand">
+        <svg class="header-logo" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+        </svg>
+        <span><span class="accent">Penn</span> Academic Co-Pilot</span>
+      </div>
+      <nav class="header-tabs" aria-label="View">
+        <button class="tab-btn active" data-tab="chat">💬 Chat</button>
+        <button class="tab-btn" data-tab="schedule">📅 Schedule</button>
+      </nav>
+      <div class="header-meta">
+        <span class="header-badge hidden" id="header-major"></span>
+        <span class="header-badge hidden" id="header-courses"></span>
+        <button class="header-action" id="transcript-btn">Upload transcript</button>
+        <button class="header-action" id="reset-btn">New session</button>
+      </div>
+    </header>
+
+    <!-- ── Chat view ──────────────────────────────────────────────────────── -->
+    <div id="chat-view">
+      <div class="messages-area" id="messages">
+        <div class="welcome-msg" id="welcome-msg">
+          <div class="welcome-icon">🎓</div>
+          <h2>Ready to plan your semester</h2>
+          <p>Ask me about courses, prerequisites, degree requirements, or schedule conflicts.</p>
+          <div class="welcome-chips">
+            <button class="chip" data-msg="What courses should I take next semester?">What should I take next?</button>
+            <button class="chip" data-msg="What requirements do I still need to complete?">Check my requirements</button>
+            <button class="chip" data-msg="Are there any good electives in CIS this semester?">Browse CIS electives</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="input-bar">
+        <div class="input-wrapper">
+          <textarea
+            id="chat-input"
+            rows="1"
+            placeholder="Ask about courses, requirements, or schedules…"
+            aria-label="Chat message"
+          ></textarea>
+          <button id="send-btn" aria-label="Send message" disabled>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 19V5M5 12l7-7 7 7"/>
+            </svg>
+          </button>
+        </div>
+        <p class="input-hint">Enter to send &nbsp;·&nbsp; Shift+Enter for new line</p>
+      </div>
+    </div>
+
+    <!-- ── Schedule view ─────────────────────────────────────────────────── -->
+    <div id="schedule-view" class="hidden">
+      <div class="schedule-layout">
+
+        <!-- Degree progress sidebar -->
+        <aside class="prog-sidebar">
+          <div class="prog-sidebar-header">
+            Degree Progress
+          </div>
+          <div id="progress-content">
+            <div class="data-loading">
+              <span class="spinner-dark"></span> Loading…
+            </div>
+          </div>
+        </aside>
+
+        <!-- Weekly time grid -->
+        <section class="grid-section">
+          <div class="grid-toolbar">
+            <span id="grid-label">Schedule</span>
+            <button id="refresh-grid-btn">↺ Refresh</button>
+          </div>
+          <div class="grid-scroll">
+            <div class="time-grid" id="time-grid">
+              <div class="data-loading">
+                <span class="spinner-dark"></span> Loading schedule…
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+
+  </div>
+
+  <div id="transcript-modal" class="modal-shell hidden" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div>
+          <h3>Update Transcript</h3>
+          <p>Upload a Penn transcript PDF to automatically merge completed and AP-credit courses into your record.</p>
+        </div>
+        <button class="modal-close" id="transcript-modal-close" aria-label="Close transcript modal">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="upload-area modal-upload" id="transcript-modal-area">
+          <input type="file" id="transcript-modal-file" accept=".pdf,.txt" />
+          <div class="upload-icon">📄</div>
+          <p id="transcript-modal-label">
+            <span class="upload-link" id="transcript-modal-trigger">Choose a transcript PDF</span>
+            or drag it here
+          </p>
+          <p class="upload-sub">Parses immediately and updates your completed-course record</p>
+        </div>
+        <div id="transcript-modal-status" class="transcript-status hidden"></div>
+        <div id="transcript-modal-preview" class="transcript-preview hidden"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/marked@9/marked.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

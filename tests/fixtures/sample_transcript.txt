@@ -1,0 +1,42 @@
+Record of: Alex Chen
+Penn ID: 12345678
+School: School of Engineering and Applied Science
+Program: Bachelor of Science in Engineering
+Major : Computer Science
+
+                        UNDERGRADUATE RECORD
+
+Fall 2021
+CIS 110     Introduction to Computer Programming    1.00  A
+MATH 241    Calculus, Part III                      1.00  B+
+ENGL 1010   Writing and Rhetoric                    1.00  A-
+GPA: 3.67   Credits: 3.0
+
+Spring 2022
+CIS 120     Programming Languages and Techniques I  1.00  A
+CIS 160     Mathematical Foundations of Comp Sci    1.00  A-
+MATH 240    Linear Algebra                          1.00  B+
+GPA: 3.56   Credits: 3.0
+
+Fall 2022
+CIS 121     Programming Languages and Techniques II 1.00  A
+CIS 240     Introduction to Computer Systems        1.00  B+
+PHYS 0150   Principles of Physics I                 1.00  B
+GPA: 3.33   Credits: 3.0
+
+Spring 2023
+CIS 262     Automata, Computability, and Complexity 1.00  A
+CIS 341     Computer Organization and Design        1.00  W
+CIS 380     Operating Systems Design                1.00  I
+STAT 4300   Probability                             1.00  A-
+GPA: 3.50   Credits: 2.0
+
+Fall 2023
+CIS 320     Introduction to Algorithms              1.00  A
+CIS 471     Computer Architecture                   1.00  A-
+CIS 5200    Machine Learning                        1.00  B+
+GPA: 3.56   Credits: 3.0
+
+                        CUMULATIVE RECORD
+                        Cumulative GPA: 3.55
+                        Cumulative Credits: 13.0

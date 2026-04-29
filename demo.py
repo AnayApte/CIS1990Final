@@ -1,5 +1,5 @@
 """
-Demo: Penn Academic Co-Pilot — CourseSearch Tool
+Demo: Penn Academic Co-Pilot - CourseSearch Tool
 
 Runs a natural-language query against the live Penn Course Review API
 via the Router + CourseSearch tool.
@@ -16,7 +16,7 @@ Usage:
         "What theory courses should I take next semester?"
 
 Environment:
-    ANTHROPIC_API_KEY  — required (set in .env or shell)
+    OPENAI_API_KEY - required (set in .env or shell)
 """
 
 import argparse
@@ -42,9 +42,20 @@ def main():
         default="",
         help="Comma-separated completed courses (e.g. CIS-1200,MATH-1400)",
     )
+    parser.add_argument(
+        "--planned",
+        default="",
+        help="Comma-separated courses already planned for the target semester",
+    )
+    parser.add_argument(
+        "--earliest-start",
+        type=float,
+        default=None,
+        help="Earliest acceptable class start time, e.g. 9.0 or 10.15",
+    )
     args = parser.parse_args()
 
-    # ── Imports (after dotenv load) ──────────────────────────────────────────
+    # Imports after dotenv load.
     from memory.memory_store import MemoryStore
     from agent.router import Router
 
@@ -53,8 +64,13 @@ def main():
         memory.set_major(args.major)
     if args.taken:
         memory.set_classes([c.strip() for c in args.taken.split(",") if c.strip()])
+    if args.planned:
+        for course_code in [c.strip() for c in args.planned.split(",") if c.strip()]:
+            memory.add_course_to_schedule(course_code, "", 0)
+    if args.earliest_start is not None:
+        memory.set_preferences({"earliest_start": args.earliest_start})
 
-    # ── Pre-warm the course list cache ──────────────────────────────────────
+    # Pre-warm the course list cache.
     # search_courses downloads ~5800 courses on the first call (~38s).
     # We do it here so the demo query itself feels snappy.
     print("Loading Penn course catalog (first run takes ~40s, cached after)...")
@@ -64,14 +80,21 @@ def main():
     elapsed = time.time() - t0
     print(f"  Loaded {len(courses)} courses in {elapsed:.1f}s. Cache is warm.\n")
 
-    # ── Run the query ────────────────────────────────────────────────────────
+    # Run the query.
     router = Router(memory)
 
     print("=" * 65)
     print("Query:", args.query)
     if args.major or args.taken:
-        print(f"Context: major={args.major or '(not set)'}, "
-              f"taken={args.taken or '(none)'}")
+        print(
+            f"Context: major={args.major or '(not set)'}, "
+            f"taken={args.taken or '(none)'}"
+        )
+    if args.planned or args.earliest_start is not None:
+        print(
+            f"Schedule prefs: planned={args.planned or '(none)'}, "
+            f"earliest_start={args.earliest_start if args.earliest_start is not None else '(none)'}"
+        )
     print("=" * 65)
     print()
 
